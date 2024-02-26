@@ -25,7 +25,7 @@
 
 
 ```
-git clone https://github.com/theArjun/my-nvim-config ~/.config/nvim
+git clone git@github.com:Denes-cilwal/my-nvim-config.git ~/.config/nvim
 ```
 
 ## Sessionizer
