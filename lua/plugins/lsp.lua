@@ -13,14 +13,15 @@ return {
       "L3MON4D3/LuaSnip",             -- snippet engine
       "saadparwaiz1/cmp_luasnip",     -- for autocompletion
       "rafamadriz/friendly-snippets", -- useful snippets
+      "onsails/lspkind-nvim",         -- adds icons to completion items
     },
     config = function()
       local cmp = require("cmp")
       local luasnip = require("luasnip")
+      local lspkind = require("lspkind")
 
       -- loads vscode style snippets from installed plugins (e.g. friendly-snippets)
       require("luasnip.loaders.from_vscode").lazy_load()
-
       cmp.setup({
         completion = {
           completeopt = "menu,menuone,preview,noselect",
@@ -51,6 +52,17 @@ return {
           { name = "buffer" },  -- text within current buffer
           { name = "path" },    -- file system paths
         }),
+        formatting = {
+          format = lspkind.cmp_format({
+            mode = 'symbol_text',
+            menu = ({
+              buffer = "[Buffer]",
+              nvim_lsp = "[LSP]",
+              luasnip = "[Snippet]",
+              path = "[Path]",
+            }),
+          }),
+        },
       })
     end,
   },
@@ -67,9 +79,10 @@ return {
           local null_ls = require("null-ls")
           null_ls.setup({
             sources = {
-              null_ls.builtins.diagnostics.eslint,
               null_ls.builtins.formatting.prettier,
               null_ls.builtins.code_actions.gitsigns,
+              null_ls.builtins.formatting.black,
+              null_ls.builtins.gopls,
             },
           })
         end,
@@ -109,42 +122,19 @@ return {
       vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = "rounded" })
 
       local lsp_capabilities = require('cmp_nvim_lsp').default_capabilities()
-      local on_attach = function(client, bufnr)
-        -- enable completion
-        require('cmp_nvim_lsp').setup({ client = client })
-
-        -- enable null-ls
-        require('null-ls').setup({ bufnr = bufnr })
-
-        -- enable gitsigns
-        require('gitsigns').setup({
-          attach_to_untracked = false,
-          current_line_blame = true,
-          current_line_blame_opts = {
-            virt_text = true,
-            virt_text_pos = 'eol',
-            delay = 1000,
-          },
-        })
-      end
-
       local default_setup = function(server)
         require('lspconfig')[server].setup({
           capabilities = lsp_capabilities,
-          on_attach = on_attach,
         })
       end
 
       require('mason-lspconfig').setup({
         ensure_installed = {
+          "gopls",
           "tsserver",
           "html",
-          "pyright",
-          "jsonls",
-          "dockerls",
-          "ruff_lsp",
-          "marksman",
-          "sourcery",
+          "tailwindcss",
+          "pyright"
         },
         handlers = {
           default_setup,
